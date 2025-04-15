@@ -81,7 +81,7 @@ This project teaches you how to:
 ### 🚀 How to Run the Tool
 
 ```bash
-python multi_region_auditor.py
+python auditor.py
 ```
 
 This will:
