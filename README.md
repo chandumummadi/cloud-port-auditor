@@ -27,13 +27,13 @@ This project teaches you how to:
 
 ---
 
-### 🎯 What This Tool Does (Step-by-Step)
+### 🌟 What This Tool Does (Step-by-Step)
 
 1. **Connect to AWS** using the `boto3` Python SDK with your IAM credentials.
-2. **Fetch all EC2 Security Groups** in your account.
+2. **Fetch all EC2 Security Groups** in your account (across all AWS regions).
 3. For each Security Group:
    - Look at **inbound rules**.
-   - Check if any sensitive ports (22, 3389, 3306, etc.) are open to **`0.0.0.0/0`**.
+   - Check if any sensitive ports (22, 3389, 3306, etc.) are open to **`0.0.0.0/0`** or **`::/0`**.
 4. **Flag each insecure rule** with details:
    - Port number
    - Protocol
@@ -43,53 +43,110 @@ This project teaches you how to:
    - Console (basic view)
    - Optional: Save as CSV or JSON report
    - Optional: Send email or Slack alert
-6. (Optional Phase 2): **Auto-remediate** insecure rules if configured (e.g., remove rule or restrict it to your IP).
+6. *(Optional Phase 2)*: **Auto-remediate** insecure rules if configured (e.g., remove rule or restrict it to your IP).
 
 ---
 
-### 🧰 Tools & Technologies Used
+### 🧰 AWS Configuration (Step-by-Step)
 
-| Tool / Library | Purpose |
-|----------------|---------|
-| **Python** | Scripting and automation |
-| **boto3** | AWS SDK for Python |
-| **AWS IAM User** | Authenticated access to EC2 Security Groups |
-| **AWS EC2** | For fetching Security Groups |
-| **Security Group rules** | To find exposed ports |
-| *(Optional)* Pandas | For creating reports |
-| *(Optional)* smtplib / Slack Webhook | To send alerts |
+1. **Login to AWS Console**
+2. Navigate to **IAM > Users > Add User**
+   - Name: `cloud-auditor`
+   - Access type: `Programmatic access`
+3. Assign the user the **AmazonEC2ReadOnlyAccess** policy *(or a custom one with `ec2:DescribeSecurityGroups`)*
+4. Download the access key & secret key (used in boto3 or `aws configure`)
 
 ---
 
-### 🔍 What Ports Are Considered Risky?
-You can customize this list, but common ones include:
+### 🔧 Local Environment Setup
+
+1. **Install AWS CLI**:
+   ```bash
+   brew install awscli  # or sudo apt install awscli
+   aws configure  # Enter access key, secret, region, and json as output
+   ```
+
+2. **Install Python dependencies**:
+   ```bash
+   pip install boto3 pandas requests
+   ```
+
+3. (Optional) **Activate a virtual environment**:
+   ```bash
+   python -m venv venv && source venv/bin/activate
+   ```
+
+---
+
+### 🚀 How to Run the Tool
+
+```bash
+python multi_region_auditor.py
+```
+
+This will:
+- Loop through all AWS regions
+- Scan every EC2 security group
+- Detect risky ports open to the internet
+- Output results to the console and `exposed_ports_<timestamp>.csv/json`
+
+---
+
+### 📊 Sample Output
+```
+🌐 Scanning region: us-east-1
+🔥 ssh-group (sg-xxxx) exposes port 22/tcp to 0.0.0.0/0
+🔥 db-group (sg-yyyy) exposes port 3306/tcp to ::/0
+```
+
+---
+
+### 📄 Output Files
+- `exposed_ports_YYYYMMDD_HHMMSS.csv`
+- `exposed_ports_YYYYMMDD_HHMMSS.json`
+
+---
+
+### 🔍 Ports Considered Risky (Customizable)
 - `22` (SSH)
 - `3389` (RDP)
 - `3306` (MySQL)
 - `5432` (PostgreSQL)
 - `6379` (Redis)
 - `9200` (Elasticsearch)
-- Any port not meant for public access
+
+> Edit the `RISKY_PORTS` list in the script to change these.
 
 ---
 
-### ✅ What You'll Learn
-
-- Auditing AWS network configurations
-- Using AWS SDKs securely (boto3, IAM roles)
-- Identifying misconfigurations
-- Following **cloud security best practices**
-- Writing clean, extensible Python scripts
-- Automating routine security checks (like DevSecOps pros do)
+### 📚 Future Plans (Optional Phase 2)
+- [ ] Slack alerting via webhook
+- [ ] Email alerting via SMTP or AWS SES
+- [ ] Auto-remediation for public rules
+- [ ] Flask dashboard for visualization
+- [ ] Multi-account/org-wide auditing with STS
 
 ---
 
-### 🌱 Future Enhancements
-
-- Add support for **multiple cloud providers** (Azure, GCP).
-- Visualize results in a dashboard (e.g., using Streamlit or Flask).
-- Integrate with **SIEM tools** like Splunk or Elastic.
-- Schedule this script as a **Lambda function or CRON job**.
-- Send automatic Slack/email/Teams alerts.
+### 🏦 Project Folder Structure
+```
+cloud-port-auditor/
+├── auditor.py                # Single-region version
+├── multi_region_auditor.py  # Multi-region scanner + export
+├── exposed_ports_*.csv      # Output report
+├── requirements.txt
+└── README.md
+```
 
 ---
+
+### 🏠 Author
+Built with ❤️ by Sharath Chandra Mummadi
+
+---
+
+### 🔒 Security Note
+This tool is meant for **auditing and educational purposes**. Do not leave publicly exposed ports unless strictly required.
+
+> Security is not a one-time action. It is a continuous process.
+
