@@ -148,5 +148,12 @@ Built with ❤️ by Sharath Chandra Mummadi
 ### 🔒 Security Note
 This tool is meant for **auditing and educational purposes**. Do not leave publicly exposed ports unless strictly required.
 
+
+## 🛡️ IMPORTANT: Scope & Safety
+This tool is designed to audit your own AWS account only.
+
+🔒 Do not use this tool to scan AWS environments you do not own or have explicit permission to audit.
+Unauthorized scanning of third-party infrastructure may violate AWS Terms of Service and applicable laws.
+
 > Security is not a one-time action. It is a continuous process.
 
